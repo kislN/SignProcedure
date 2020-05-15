@@ -1,5 +1,7 @@
 
 """Statistics T2, T3 for hypothesis H_i,j,k"""
+# input: matrix of returns of stocks and indexes of 3 stocks
+# output: statistic
 def stat_T2(ret_inds, i, j, k):
   _sum = 0
   for t in range(len(ret_inds[0])):
@@ -15,7 +17,8 @@ def stat_T3(ret_inds, i, j, k):
   return _sum
 
 """Statistics R2, R3 for hypothesis H_i,j,k,l"""
-
+# input: matrix of returns of stocks and indexes of 4 stocks
+# output: statistic
 def stat_R2(ret_inds, i, j, k, l):
   _sum = 0
   for t in range(len(ret_inds[0])):

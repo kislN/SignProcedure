@@ -1,6 +1,7 @@
 import networkx as nx
 
-
+# input: matrix of correlations, list of ticks of stocks
+# output: MST
 def create_Kruskal_MST(cor, stocks):
     dict_edges = []
     for i in range(len(stocks)):

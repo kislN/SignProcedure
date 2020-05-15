@@ -1,6 +1,8 @@
 import networkx as nx
 from hypotheses.tests import *
 
+# input: matrix of correlations, list of tickers of stocks
+# output: MST
 def create_Prim_MST(coef_matrix, stocks):
     G = nx.Graph()
     G.add_node(stocks[0])
@@ -36,9 +38,9 @@ def create_Prim_MST(coef_matrix, stocks):
             G.add_edge(stocks[vert_i], stocks[vert_j])
     return G
 
-
+# input: matrix of returns of stocks, list of tickers of stocks, alpha for test, kind of test
 # params: we can put the parameter kind_of_test as 'simple', 'complex_rand' or 'complex_max'
-
+# output: MST
 def create_Prim_hypot_MST(ret_inds, stocks, alpha=0.05, kind_of_test='simple'):
     if kind_of_test == 'simple':
         test_3 = test_ijk
