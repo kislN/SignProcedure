@@ -1,5 +1,5 @@
 import networkx as nx
-from hypotheses.tests import *
+from hypotheses.sign_tests import *
 
 # input: matrix of correlations, list of tickers of stocks
 # output: MST
@@ -26,7 +26,6 @@ def create_Prim_MST(coef_matrix, stocks):
                 max_ij.append((vert_i, vert_j))
 
         if len(max_ij) != 0:
-
             vert_i = max_ij[0][0]
             vert_j = max_ij[0][1]
 

@@ -5,15 +5,15 @@
 def stat_T2(ret_inds, i, j, k):
   _sum = 0
   for t in range(len(ret_inds[0])):
-    _sum += ret_inds[i][t] * ret_inds[j][t] * (1 - ret_inds[k][t]) + \
-           (1 - ret_inds[i][t]) * (1 - ret_inds[j][t]) * ret_inds[k][t]
+    _sum += (ret_inds[i][t] * ret_inds[j][t] * (1 - ret_inds[k][t])) + \
+            ((1 - ret_inds[i][t]) * (1 - ret_inds[j][t]) * ret_inds[k][t])
   return _sum
 
 def stat_T3(ret_inds, i, j, k):
   _sum = 0
   for t in range(len(ret_inds[0])):
-    _sum += ret_inds[i][t] * (1 - ret_inds[j][t]) * ret_inds[k][t] + \
-           (1 - ret_inds[i][t]) * ret_inds[j][t] * (1 - ret_inds[k][t])
+    _sum += (ret_inds[i][t] * (1 - ret_inds[j][t]) * ret_inds[k][t]) + \
+            ((1 - ret_inds[i][t]) * ret_inds[j][t] * (1 - ret_inds[k][t]))
   return _sum
 
 """Statistics R2, R3 for hypothesis H_i,j,k,l"""

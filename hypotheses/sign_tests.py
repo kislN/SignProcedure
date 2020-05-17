@@ -1,6 +1,6 @@
 import scipy.special
 import random
-from hypotheses.statistics import *
+from hypotheses.sign_statistics import *
 
 
 # input: alpha and statistic k = k_2 + k_3
