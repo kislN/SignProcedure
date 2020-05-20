@@ -41,40 +41,41 @@ def compare_MSTs(ref_MST, ref_corr, observ_num, stocks, iters=1000, measure='Pea
     return counter/iters
 
 
-# def compare_procedures(ref_MST, iters=1000, alphas=[0.2, 0.15, 0.1, 0.05], seq_nums=[100]):
-#     for alpha in alphas:
-#         print('alpha = ', alpha)
-#         for seq_num in seq_nums:
-#             count_corr = 0
-#             count_simple = 0
-#             count_compl_rand = 0
-#             count_compl_max = 0
-#             for iter in range(iters):
-#                 new_rets = get_norm_seq(corr, seq_num)
-#                 new_inds = get_inds_matrix(new_rets)
-#                 G_corr = create_Prima_MST(np.corrcoef(new_rets), stcks)
-#                 G_hypoth = create_hypot_MST(new_inds, stcks, alpha)
-#                 G_compl_rand = create_hypot_MST(new_inds, stcks, alpha, kind_of_test='complex_rand')
-#                 G_compl_max = create_hypot_MST(new_inds, stcks, alpha, kind_of_test='complex_max')
-#                 if sorted(ref_MST.degree) == sorted(G_corr.degree):
-#                     count_corr += 1
-#                 if sorted(ref_MST.degree) == sorted(G_hypoth.degree):
-#                     count_simple += 1
-#                 if sorted(ref_MST.degree) == sorted(G_compl_rand.degree):
-#                     count_compl_rand += 1
-#                 if sorted(ref_MST.degree) == sorted(G_compl_max.degree):
-#                     count_compl_max += 1
-#
-#             print('observations number = {} \n \
-#       rate of the same: \n \
-#       procedure of correlation: {} \n \
-#       simple hypothetical procedure: {} \n \
-#       complex (rand) hypothetical procedure: {} \n \
-#       complex (max) hypothetical procedure: {}'.format(seq_num, \
-#                                                        count_corr / iters, \
-#                                                        count_simple / iters, \
-#                                                        count_compl_rand / iters, \
-#                                                        count_compl_max / iters))
+def compare_procedures(corr, stcks, ref_MST, iters=1000, alphas=[0.2, 0.15, 0.1, 0.05], seq_nums=[100]):
+    for alpha in alphas:
+        print('alpha = ', alpha)
+        for seq_num in seq_nums:
+            count_corr = 0
+            count_simple = 0
+            count_compl_rand = 0
+            count_compl_max = 0
+            for iter in range(iters):
+                new_rets = get_norm_seq(corr, seq_num)
+                new_inds = get_inds_matrix(new_rets)
+                G_corr = create_Prim_MST(np.corrcoef(new_rets), stcks)
+                G_hypoth = create_Prim_hypot_MST(new_inds, stcks, alpha)
+                G_compl_rand = create_Prim_hypot_MST(new_inds, stcks, alpha, kind_of_test='complex_rand')
+                G_compl_max = create_Prim_hypot_MST(new_inds, stcks, alpha, kind_of_test='complex_max')
+                if sorted(ref_MST.degree) == sorted(G_corr.degree):
+                    count_corr += 1
+                if sorted(ref_MST.degree) == sorted(G_hypoth.degree):
+                    count_simple += 1
+                if sorted(ref_MST.degree) == sorted(G_compl_rand.degree):
+                    count_compl_rand += 1
+                if sorted(ref_MST.degree) == sorted(G_compl_max.degree):
+                    count_compl_max += 1
+
+            print('observations number = {} \n \
+      rate of the same: \n \
+      procedure of correlation: {} \n \
+      simple hypothetical procedure: {} \n \
+      complex (rand) hypothetical procedure: {} \n \
+      complex (max) hypothetical procedure: {}'.format(seq_num, \
+                                                       count_corr / iters, \
+                                                       count_simple / iters, \
+                                                       count_compl_rand / iters, \
+                                                       count_compl_max / iters))
+
 
 """temporarily here"""
 
