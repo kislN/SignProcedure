@@ -11,7 +11,7 @@ from distributions.multivariate_t import get_Student_seq
 # input: true MST, true correlations matrix, number of observations, list of tickers of stocks, iterations,
 # kind of measure of dependency
 # output: the rate of MST that matched with true MST
-def compare_MSTs(ref_MST, ref_corr, observ_num, stocks, iters=1000, measure='Pearson', distr='normal'):
+def compare_MSTs(ref_MST, ref_corr, observ_num, stocks, iters=1000, measure='Pearson', distr='normal', dof=1):
 
     counter = 0
     ref_degrees = sorted(ref_MST.degree)
@@ -20,7 +20,7 @@ def compare_MSTs(ref_MST, ref_corr, observ_num, stocks, iters=1000, measure='Pea
         if distr == 'normal':
             new_rets = get_norm_seq(ref_corr, observ_num)
         elif distr == 'Student':
-            new_rets = get_Student_seq(ref_corr, 1, observ_num)
+            new_rets = get_Student_seq(ref_corr, dof, observ_num)
         if measure == 'Pearson':
             new_corr = np.corrcoef(new_rets)
         elif measure == 'Sign':

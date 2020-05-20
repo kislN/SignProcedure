@@ -44,10 +44,10 @@ def test_ijk(i, j, k, ret_inds, alpha):
   k3 = stat_T3(ret_inds, i, j, k)
   k = k2 + k3
   c2 = get_threshold_c2(alpha, k)
-  if k2 == c2:
-    # print('test_ijk, random')
-    return random.randint(0, 1)
-  return k2 > c2
+  # if k2 == c2:
+  #   # print('test_ijk, random')
+  #   return random.randint(0, 1)
+  return k2 >= c2       # if random then k2 > c2
 
 def complex_rand_test_ijk(i, j, k, ret_inds, alpha):
   k2 = stat_T2(ret_inds, i, j, k)
@@ -86,10 +86,10 @@ def test_ijkl(i, j, k, l, ret_inds, alpha):
   k3 = stat_R3(ret_inds, i, j, k, l)
   k = k2 + k3
   c2 = get_threshold_c2(alpha, k)
-  if k2 == c2:
-    # print('test_ijkl, random')
-    return random.randint(0, 1)
-  return k2 > c2
+  # if k2 == c2:
+  #   # print('test_ijkl, random')
+  #   return random.randint(0, 1)
+  return k2 >= c2
 
 def complex_rand_test_ijkl(i, j, k, l, ret_inds, alpha):
   k2 = stat_R2(ret_inds, i, j, k, l)
