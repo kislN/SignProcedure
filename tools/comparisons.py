@@ -107,6 +107,7 @@ def draw_rates(data_x, data_y, alpha, corr, stocks, title, title_x='x', title_y=
     fig.update_yaxes(title_text=title_y)
 
     fig.show()
+
 #
 def test_rates(corr, stocks, kind_of_test, seq_num_list=np.arange(20, 200, 20),
                alpha_list=[0.1, 0.05, 0.01], iters=1000, title='', title_x='', title_y=''):
