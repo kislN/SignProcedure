@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def get_norm_seq(sigma, n, mu=None):
+def norm_seq(sigma, n, mu=None):
     """
     Produce n samples of N-dimensional multivariate normal distribution
 

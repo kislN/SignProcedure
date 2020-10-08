@@ -1,9 +1,10 @@
 import networkx as nx
 from hypotheses.sign_tests import *
 
+
 # input: matrix of correlations, list of tickers
 # output: MST
-def create_Prim_MST(coef_matrix, stocks):
+def create_Prim_MST(corr, stocks):
     G = nx.Graph()
     G.add_node(stocks[0])
     vert_i = 0
@@ -19,7 +20,7 @@ def create_Prim_MST(coef_matrix, stocks):
                     vert_j = j
                     for k in range(j + 1, len(stocks)):
                         if stocks[k] not in G.nodes and stocks[k] != stock_i:
-                            if coef_matrix[vert_i][vert_j] < coef_matrix[vert_i][k]:
+                            if corr[vert_i][vert_j] < corr[vert_i][k]:
                                 vert_j = k
                     break
             if vert_i != vert_j:
@@ -30,7 +31,7 @@ def create_Prim_MST(coef_matrix, stocks):
             vert_j = max_ij[0][1]
 
             for itr in range(1, len(max_ij)):
-                if coef_matrix[vert_i][vert_j] < coef_matrix[max_ij[itr][0]][max_ij[itr][1]]:
+                if corr[vert_i][vert_j] < corr[max_ij[itr][0]][max_ij[itr][1]]:
                     vert_i = max_ij[itr][0]
                     vert_j = max_ij[itr][1]
 

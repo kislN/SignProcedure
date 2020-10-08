@@ -2,7 +2,7 @@ import numpy as np
 from statsmodels.sandbox.distributions.multivariate import multivariate_t_rvs as gen_t
 
 
-def get_student_seq(sigma, dof, n, mu=None):
+def student_seq(sigma, dof, n, mu=None):
     """
     Produce n samples of N-dimensional multivariate t distribution
 
@@ -22,7 +22,7 @@ def get_student_seq(sigma, dof, n, mu=None):
     return (mu + z / np.sqrt(g)).T
 
 
-def get_t_seq(sigma, dof, n, mu=None):
+def t_seq(sigma, dof, n, mu=None):
     """
     Produce n samples of N-dimensional multivariate t distribution
 

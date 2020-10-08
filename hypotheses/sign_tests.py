@@ -3,8 +3,6 @@ import random
 from hypotheses.sign_statistics import *
 
 
-# input: alpha and statistic k = k_2 + k_3
-# output: threshold c2
 def threshold_c_right(alpha, k) -> int:
     c = 0
     while True:
@@ -19,8 +17,6 @@ def threshold_c_right(alpha, k) -> int:
     return c
 
 
-# input: alpha and statistic k = k_2 + k_3
-# output: threshold c1
 def threshold_c_left(alpha, k) -> int:
     c = k + 1
     while True:
@@ -40,11 +36,13 @@ class Test:
         self.alpha = alpha
         self.ret_inds = ret_inds
 
-    # input: 3 indexes of stocks, matrix of returns of stocks, alpha
-    # output: 1 - if hypothesis H_i,j,k is rejected, 0 - otherwise
-    def one_sided_test_ijk(self, i, j, k, kind='not_rand'):
-        k2 = stat_T2(self.ret_inds, i, j, k)
-        k3 = stat_T3(self.ret_inds, i, j, k)
+    def one_sided(self, compared_stocks, kind='not_rand'):
+        if len(compared_stocks) == 3:
+            k2 = stat_T2(self.ret_inds, compared_stocks)
+            k3 = stat_T3(self.ret_inds, compared_stocks)
+        else:
+            k2 = stat_R2(self.ret_inds, compared_stocks)
+            k3 = stat_R3(self.ret_inds, compared_stocks)
         c_r = threshold_c_right(self.alpha, k2 + k3)
         if kind == 'rand' and k2 == c_r:
             return random.randint(0, 1)
@@ -55,9 +53,13 @@ class Test:
                 return k2 > k3
         return k2 >= c_r
 
-    def two_sided_test_ijk(self, i, j, k, kind='rand'):
-        k2 = stat_T2(self.ret_inds, i, j, k)
-        k3 = stat_T3(self.ret_inds, i, j, k)
+    def two_sided(self, compared_stocks, kind='rand'):
+        if len(compared_stocks) == 3:
+            k2 = stat_T2(self.ret_inds, compared_stocks)
+            k3 = stat_T3(self.ret_inds, compared_stocks)
+        else:
+            k2 = stat_R2(self.ret_inds, compared_stocks)
+            k3 = stat_R3(self.ret_inds, compared_stocks)
         c_l = threshold_c_left(self.alpha / 2, k2 + k3)
         c_r = threshold_c_right(self.alpha / 2, k2 + k3)
         if k2 >= c_r:
@@ -71,43 +73,3 @@ class Test:
                 return random.randint(0, 1)
             else:
                 return k2 > k3
-
-
-    def one_sided_test_ijkl(self, i, j, k, l, ret_inds, alpha):
-        k2 = stat_R2(ret_inds, i, j, k, l)
-        k3 = stat_R3(ret_inds, i, j, k, l)
-        k = k2 + k3
-        c2 = threshold_c_right(alpha, k)
-        # if k2 == c2:
-        #   # print('test_ijkl, random')
-        #   return random.randint(0, 1)
-        return k2 >= c2
-
-
-    def complex_rand_test_ijkl(i, j, k, l, ret_inds, alpha):
-        k2 = stat_R2(ret_inds, i, j, k, l)
-        k3 = stat_R3(ret_inds, i, j, k, l)
-        k = k2 + k3
-        c1 = threshold_c_left(alpha, k)
-        c2 = threshold_c_right(alpha, k)
-        if k2 > c2:
-            return 1
-        if k2 < c1:
-            return 0
-        return random.randint(0, 1)
-
-
-    def complex_max_test_ijkl(i, j, k, l, ret_inds, alpha):
-        k2 = stat_T2(ret_inds, i, j, k)
-        k3 = stat_T3(ret_inds, i, j, k)
-        k = k2 + k3
-        c1 = threshold_c_left(alpha, k)
-        c2 = threshold_c_right(alpha, k)
-        if k2 > c2:
-            return 1
-        if k2 < c1:
-            return 0
-        if k2 == k3:
-            return random.randint(0, 1)
-        else:
-            return k2 > k3
