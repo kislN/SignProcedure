@@ -3,7 +3,7 @@ import random
 from hypotheses.sign_statistics import *
 
 
-def threshold_c_right(alpha, k) -> int:
+def threshold_c_right(alpha, k):
     c = 0
     while True:
         _sum = 0
@@ -43,7 +43,8 @@ class Test:
         else:
             k2 = stat_R2(self.ret_inds, compared_stocks)
             k3 = stat_R3(self.ret_inds, compared_stocks)
-        c_r = threshold_c_right(self.alpha, k2 + k3)
+        k = k2 + k3
+        c_r = threshold_c_right(self.alpha, k)
         if kind == 'rand' and k2 == c_r:
             return random.randint(0, 1)
         elif kind == 'max' and k2 == c_r:

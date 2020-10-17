@@ -27,7 +27,7 @@ def get_returns(prices):
 # input: matrix of returns of N stocks for n days
 # output: matrix of indicators of the returns of N stocks for n days
 def indicators(returns):
-    return np.heaviside(returns, 0)
+    return np.heaviside(returns, 0).astype(int)
 
 
 # input: returns of two stocks

@@ -134,6 +134,8 @@ def test_rates(corr, stocks, one_sided=True, kind='not_rand', seq_num_list=np.ar
         compared_list = [0, 1, 2]
     elif len(corr) == 4:
         compared_list = [0, 1, 2, 3]
+    else:
+        print('Wrong matrix side')
 
     rate_list = []
     for i, alpha in enumerate(alpha_list):
