@@ -2,8 +2,6 @@ import networkx as nx
 from hypotheses.sign_tests import *
 
 
-# input: matrix of correlations, list of tickers
-# output: MST
 def create_Prim_MST(corr, stocks):
     G = nx.Graph()
     G.add_node(stocks[0])
@@ -38,19 +36,27 @@ def create_Prim_MST(corr, stocks):
             G.add_edge(stocks[vert_i], stocks[vert_j])
     return G
 
-# input: matrix of returns, list of tickers, alpha for test, kind of test
-# params: we can put the parameter kind_of_test as 'simple', 'complex_rand' or 'complex_max'
-# output: MST
-def create_Prim_hypot_MST(ret_inds, stocks, alpha=0.05, kind_of_test='simple'):
-    if kind_of_test == 'simple':
-        test_3 = test_ijk
-        test_4 = test_ijkl
-    elif kind_of_test == 'complex_rand':
-        test_3 = complex_rand_test_ijk
-        test_4 = complex_rand_test_ijkl
-    elif kind_of_test == 'complex_max':
-        test_3 = complex_max_test_ijk
-        test_4 = complex_max_test_ijkl
+
+def create_Prim_hypot_MST(ret_inds, stocks, alpha=0.05, one_sided=True, kind='not_rand'):
+    if one_sided:
+        method_name = 'one_sided'
+    else:
+        method_name = 'two_sided'
+
+    test = Test(alpha, ret_inds)
+
+
+    #
+    #
+    # if kind_of_test == 'simple':
+    #     test_3 = test_ijk
+    #     test_4 = test_ijkl
+    # elif kind_of_test == 'complex_rand':
+    #     test_3 = complex_rand_test_ijk
+    #     test_4 = complex_rand_test_ijkl
+    # elif kind_of_test == 'complex_max':
+    #     test_3 = complex_max_test_ijk
+    #     test_4 = complex_max_test_ijkl
 
     G = nx.Graph()
     G.add_node(stocks[0])
@@ -67,13 +73,12 @@ def create_Prim_hypot_MST(ret_inds, stocks, alpha=0.05, kind_of_test='simple'):
                     vert_j = j
                     for k in range(j + 1, len(stocks)):
                         if stocks[k] not in G.nodes and stocks[k] != stock_i:
-                            if test_3(vert_i, vert_j, k, ret_inds, alpha) != 1:
+                            if getattr(test, method_name)([vert_i, vert_j, k], kind) != 1:
+                            # if test_3(vert_i, vert_j, k, ret_inds, alpha) != 1:
                                 vert_j = k
                     break
             if vert_i != vert_j:
                 max_ij.append((vert_i, vert_j))
-
-        # print('max_ij: ', max_ij)
 
         if len(max_ij) != 0:
 
@@ -82,24 +87,29 @@ def create_Prim_hypot_MST(ret_inds, stocks, alpha=0.05, kind_of_test='simple'):
 
             for itr in range(1, len(max_ij)):
 
-                if vert_i == max_ij[itr][0]:  # тупой костыль, потом переделаю
-                    if test_3(vert_i, vert_j, max_ij[itr][1], ret_inds, alpha) != 1:
+                if vert_i == max_ij[itr][0]:
+                    if getattr(test, method_name)([vert_i, vert_j, max_ij[itr][1]], kind) != 1:
+                    # if test_3(vert_i, vert_j, max_ij[itr][1], ret_inds, alpha) != 1:
                         vert_j = max_ij[itr][1]
 
                 elif vert_i == max_ij[itr][1]:
-                    if test_3(vert_i, vert_j, max_ij[itr][0], ret_inds, alpha) != 1:
+                    if getattr(test, method_name)([vert_i, vert_j, max_ij[itr][0]], kind) != 1:
+                    # if test_3(vert_i, vert_j, max_ij[itr][0], ret_inds, alpha) != 1:
                         vert_j = max_ij[itr][0]
 
                 elif vert_j == max_ij[itr][0]:
-                    if test_3(vert_j, vert_i, max_ij[itr][1], ret_inds, alpha) != 1:
+                    if getattr(test, method_name)([vert_j, vert_i, max_ij[itr][1]], kind) != 1:
+                    # if test_3(vert_j, vert_i, max_ij[itr][1], ret_inds, alpha) != 1:
                         vert_i = max_ij[itr][1]
 
                 elif vert_j == max_ij[itr][1]:
-                    if test_3(vert_j, vert_i, max_ij[itr][0], ret_inds, alpha) != 1:
+                    if getattr(test, method_name)([vert_j, vert_i, max_ij[itr][0]], kind) != 1:
+                    # if test_3(vert_j, vert_i, max_ij[itr][0], ret_inds, alpha) != 1:
                         vert_i = max_ij[itr][0]
 
                 else:
-                    if test_4(vert_i, vert_j, max_ij[itr][0], max_ij[itr][1], ret_inds, alpha) != 1:
+                    if getattr(test, method_name)([vert_i, vert_j, max_ij[itr][0], max_ij[itr][1]], kind) != 1:
+                    # if test_4(vert_i, vert_j, max_ij[itr][0], max_ij[itr][1], ret_inds, alpha) != 1:
                         vert_i = max_ij[itr][0]
                         vert_j = max_ij[itr][1]
             # print('take edge {}-{}'.format(stocks[vert_i], stocks[vert_j]))

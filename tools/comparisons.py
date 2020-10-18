@@ -1,45 +1,179 @@
 import numpy as np
 import plotly.graph_objs as go
+import pandas as pd
+from tqdm import tqdm
 
 from tools.data_transform import *
-from algorithms.Kruskal import create_Kruskal_MST
+from algorithms.Kruskal import create_Kruskal_MST, create_Kruskal_hypot_MST
 from algorithms.Prim import *
 from hypotheses.sign_tests import Test
 from distributions.multivariate_normal import norm_seq
 from distributions.multivariate_t import student_seq, t_seq
 
 
-# input: true MST, true correlations matrix, number of observations, list of tickers of stocks, iterations,
-# kind of measure of dependency
-# output: the rate of MST that matched with true MST
-def compare_MSTs(ref_MST, ref_corr, observ_num, stocks, iters=1000, measure='Pearson', distr='normal', dof=1):
-
+def count_rate_proc(ref_MST, ref_corr, observ_num, stocks, iters=1000, measure='pearson', distr='normal', dof=1, rate=0.5):
     counter = 0
     ref_degrees = sorted(ref_MST.degree)
+    if distr == 'mix':
+        rate_list = np.random.choice([0, 1], p=[1 - rate, rate], size=iters)
 
-    for itr in range(iters):
+    for itr in tqdm(range(iters)):
+
         if distr == 'normal':
             new_rets = norm_seq(ref_corr, observ_num)
-        elif distr == 'Student':
-            new_rets = student_seq(ref_corr, dof, observ_num)
-        if measure == 'Pearson':
+        elif distr == 'student':
+            new_rets = t_seq(ref_corr, dof, observ_num)
+        elif distr == 'mix':
+            if rate_list[itr] == 1:
+                new_rets = norm_seq(ref_corr, observ_num)
+            else:
+                new_rets = t_seq(ref_corr, dof, observ_num)
+
+        if measure == 'pearson':
             new_corr = np.corrcoef(new_rets)
-        elif measure == 'Sign':
+        elif measure == 'sign':
             new_inds = indicators(new_rets)
             new_corr = get_sign_matrix(new_inds)
 
         G1 = create_Kruskal_MST(new_corr, stocks)
         # G2 = create_Prim_MST(new_corr, stocks) # for testing both algorithms
-
         new_degrees = sorted(G1.degree)
 
         # if new_degrees != sorted(G2.degree):
         #     return -1
-
         if ref_degrees == new_degrees:
             counter += 1
-
     return counter/iters
+
+
+def count_rate_test(ref_MST, ref_corr, observ_num, stocks, iters=1000, one_sided=True, kind='not_rand', distr='normal',
+                    dof=1, alphas=[0.1], rate=0.5):
+    counter_prim = 0
+    counter_kruskal = 0
+    ref_degrees = sorted(ref_MST.degree)
+    if distr == 'mix':
+        rate_list = np.random.choice([0, 1], p=[1 - rate, rate], size=iters)
+
+    dict_alpha = {}
+    for alpha in alphas:
+        for itr in tqdm(range(iters)):
+
+            if distr == 'normal':
+                new_rets = norm_seq(ref_corr, observ_num)
+            elif distr == 'student':
+                new_rets = t_seq(ref_corr, dof, observ_num)
+            elif distr == 'mix':
+                if rate_list[itr] == 1:
+                    new_rets = norm_seq(ref_corr, observ_num)
+                else:
+                    new_rets = t_seq(ref_corr, dof, observ_num)
+
+            new_inds = indicators(new_rets)
+            G_Prim = create_Prim_hypot_MST(new_inds, stocks, alpha, one_sided, kind)
+            G_Kruskal = create_Kruskal_hypot_MST(new_inds, stocks, alpha, one_sided, kind)
+
+            if ref_degrees == sorted(G_Prim.degree):
+                counter_prim += 1
+            if ref_degrees == sorted(G_Kruskal.degree):
+                counter_kruskal += 1
+        dict_alpha[str(alpha) + '_alpha'] = {'Prim': counter_prim/iters, 'Kruskal': counter_kruskal/iters}
+
+    return dict_alpha
+
+
+def compare_norm(ref_MST, ref_corr, stocks, observ_num=[20], iters=1000, alphas=[0.1]):
+    dict_obs = {}
+    for observ in observ_num:
+        dict_rates = {}
+        dict_rates['pearson'] = count_rate_proc(ref_MST, ref_corr, observ, stocks, iters, measure='pearson',
+                                                distr='normal')
+        dict_rates['sign'] = count_rate_proc(ref_MST, ref_corr, observ, stocks, iters, measure='pearson',
+                                             distr='normal')
+
+        dict_rates['oneSided_notRand'] = count_rate_test(ref_MST, ref_corr, observ, stocks, iters, one_sided=True,
+                                                         kind='not_rand', distr='normal', alphas=alphas)
+        dict_rates['oneSided_rand'] = count_rate_test(ref_MST, ref_corr, observ, stocks, iters, one_sided=True,
+                                                         kind='rand', distr='normal', alphas=alphas)
+        dict_rates['oneSided_max'] = count_rate_test(ref_MST, ref_corr, observ, stocks, iters, one_sided=True,
+                                                      kind='max', distr='normal', alphas=alphas)
+        dict_rates['twoSided_rand'] = count_rate_test(ref_MST, ref_corr, observ, stocks, iters, one_sided=False,
+                                                      kind='rand', distr='normal', alphas=alphas)
+        dict_rates['twoSided_max'] = count_rate_test(ref_MST, ref_corr, observ, stocks, iters, one_sided=False,
+                                                      kind='max', distr='normal', alphas=alphas)
+
+        dict_obs[str(observ) + '_obs'] = dict_rates
+
+    return dict_obs
+
+
+def compare_stud(ref_MST, ref_corr, stocks, observ_num=[20], iters=1000, alphas=[0.1], dofs=[2]):
+    dict_obs = {}
+    for observ in observ_num:
+        dict_dof = {}
+        for dof in dofs:
+            dict_rates = {}
+            dict_rates['pearson'] = count_rate_proc(ref_MST, ref_corr, observ, stocks, iters, measure='pearson',
+                                                    distr='student', dof=dof)
+            dict_rates['sign'] = count_rate_proc(ref_MST, ref_corr, observ, stocks, iters, measure='pearson',
+                                                 distr='student', dof=dof)
+
+            dict_rates['oneSided_notRand'] = count_rate_test(ref_MST, ref_corr, observ, stocks, iters, one_sided=True,
+                                                             kind='not_rand', distr='student', dof=dof, alphas=alphas)
+            dict_rates['oneSided_rand'] = count_rate_test(ref_MST, ref_corr, observ, stocks, iters, one_sided=True,
+                                                          kind='rand', distr='student', dof=dof, alphas=alphas)
+            dict_rates['oneSided_max'] = count_rate_test(ref_MST, ref_corr, observ, stocks, iters, one_sided=True,
+                                                         kind='max', distr='student', dof=dof, alphas=alphas)
+            dict_rates['twoSided_rand'] = count_rate_test(ref_MST, ref_corr, observ, stocks, iters, one_sided=False,
+                                                          kind='rand', distr='student', dof=dof, alphas=alphas)
+            dict_rates['twoSided_max'] = count_rate_test(ref_MST, ref_corr, observ, stocks, iters, one_sided=False,
+                                                         kind='max', distr='student', dof=dof, alphas=alphas)
+            dict_dof[str(dof) + '_dof'] = dict_rates
+
+        dict_obs[str(observ) + '_obs'] = dict_dof
+
+    return dict_obs
+
+
+def compare_mix(ref_MST, ref_corr, stocks, observ_num=[20], iters=1000, alphas=[0.1], dofs=[2], norm_rates=[0.5]):
+    dict_obs = {}
+    for observ in observ_num:
+        dict_norm_rate = {}
+        for norm_rate in norm_rates:
+            dict_dof = {}
+            for dof in dofs:
+                dict_rates = {}
+                dict_rates['pearson'] = count_rate_proc(ref_MST, ref_corr, observ, stocks, iters, measure='pearson',
+                                                        distr='student', dof=dof)
+                dict_rates['sign'] = count_rate_proc(ref_MST, ref_corr, observ, stocks, iters, measure='pearson',
+                                                     distr='student', dof=dof)
+
+                dict_rates['oneSided_notRand'] = count_rate_test(ref_MST, ref_corr, observ, stocks, iters,
+                                                                 one_sided=True, kind='not_rand', distr='student',
+                                                                 dof=dof, alphas=alphas, rate=norm_rate)
+                dict_rates['oneSided_rand'] = count_rate_test(ref_MST, ref_corr, observ, stocks, iters,
+                                                              one_sided=True, kind='rand', distr='student',
+                                                              dof=dof, alphas=alphas, rate=norm_rate)
+                dict_rates['oneSided_max'] = count_rate_test(ref_MST, ref_corr, observ, stocks, iters,
+                                                             one_sided=True, kind='max', distr='student',
+                                                             dof=dof, alphas=alphas, rate=norm_rate)
+                dict_rates['twoSided_rand'] = count_rate_test(ref_MST, ref_corr, observ, stocks, iters,
+                                                              one_sided=False, kind='rand', distr='student',
+                                                              dof=dof, alphas=alphas, rate=norm_rate)
+                dict_rates['twoSided_max'] = count_rate_test(ref_MST, ref_corr, observ, stocks, iters,
+                                                             one_sided=False, kind='max', distr='student',
+                                                             dof=dof, alphas=alphas, rate=norm_rate)
+                dict_dof[str(dof) + '_dof'] = dict_rates
+
+            dict_norm_rate[str(norm_rate) + '_nRate'] = dict_dof
+
+        dict_obs[str(observ) + '_obs'] = dict_norm_rate
+
+    return dict_obs
+
+
+
+
+
 
 
 def compare_procedures(corr, stcks, ref_MST, iters=1000, alphas=[0.2, 0.15, 0.1, 0.05], seq_nums=[100]):
@@ -76,7 +210,6 @@ def compare_procedures(corr, stcks, ref_MST, iters=1000, alphas=[0.2, 0.15, 0.1,
                                                        count_simple / iters, \
                                                        count_compl_rand / iters, \
                                                        count_compl_max / iters))
-
 
 """temporarily here"""
 
@@ -136,6 +269,7 @@ def test_rates(corr, stocks, one_sided=True, kind='not_rand', seq_num_list=np.ar
         compared_list = [0, 1, 2, 3]
     else:
         print('Wrong matrix side')
+        return
 
     rate_list = []
     for i, alpha in enumerate(alpha_list):

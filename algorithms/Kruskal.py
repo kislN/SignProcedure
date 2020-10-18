@@ -3,6 +3,7 @@ from functools import cmp_to_key
 from hypotheses.sign_tests import *
 from distributions.multivariate_normal import norm_seq
 from tools.data_transform import *
+from copy import deepcopy
 
 
 def create_Kruskal_MST(corr, stocks):
@@ -30,7 +31,7 @@ def edges(stocks):
     list_edges = []
     for i in range(N):
         for j in range(i + 1, N):
-            list_edges.append((i, j))
+            list_edges.append([i, j])
     return list_edges
 
 
@@ -44,9 +45,21 @@ class EdgeComparator:
         self.test = Test(alpha, ret_inds)
 
     def comparator(self, a, b):
-        compared_list = list(set(a + b))
+        # compared_list = list(set(a + b))
+        inters = list(set(a) & set(b))
+        if len(inters) == 0:
+            compared_list = a + b
+        else:
+            a_ = deepcopy(a)
+            b_ = deepcopy(b)
+            a_.remove(inters[0])
+            b_.remove(inters[0])
+            compared_list = [inters[0], a_[0], b_[0]]
+
         t = getattr(self.test, self.method_name)(compared_list, self.kind)
-        if t:
+        # t == 0 means that we don't reject H: a <= b, otherwise - reject H
+        # t == 0 => (a <= b); t == 1 => (a > b)
+        if t == 0:
             return 1
         else:
             return -1
