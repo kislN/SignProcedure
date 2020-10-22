@@ -7,21 +7,8 @@ def get_returns(prices):
     returns = []
     for day in range(len(prices) - 1):
         returns.append(np.log(prices[day + 1] / prices[day]))
-
     # return np.diff(np.log(np.array(prices)))
     return returns
-
-
-# input: returns of one stock
-# output: indicators of the returns of the stock
-# def get_indicators(returns):
-#     inds = []
-#     for ret in returns:
-#         if ret > 0:
-#             inds.append(1)
-#         else:
-#             inds.append(0)
-#     return inds
 
 
 # input: matrix of returns of N stocks for n days

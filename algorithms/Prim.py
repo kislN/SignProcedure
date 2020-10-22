@@ -45,19 +45,6 @@ def create_Prim_hypot_MST(ret_inds, stocks, alpha=0.05, one_sided=True, kind='no
 
     test = Test(alpha, ret_inds)
 
-
-    #
-    #
-    # if kind_of_test == 'simple':
-    #     test_3 = test_ijk
-    #     test_4 = test_ijkl
-    # elif kind_of_test == 'complex_rand':
-    #     test_3 = complex_rand_test_ijk
-    #     test_4 = complex_rand_test_ijkl
-    # elif kind_of_test == 'complex_max':
-    #     test_3 = complex_max_test_ijk
-    #     test_4 = complex_max_test_ijkl
-
     G = nx.Graph()
     G.add_node(stocks[0])
     vert_i = 0

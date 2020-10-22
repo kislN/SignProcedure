@@ -87,7 +87,7 @@ def compare_norm(ref_MST, ref_corr, stocks, observ_num=[20], iters=1000, alphas=
         dict_rates = {}
         dict_rates['pearson'] = count_rate_proc(ref_MST, ref_corr, observ, stocks, iters, measure='pearson',
                                                 distr='normal')
-        dict_rates['sign'] = count_rate_proc(ref_MST, ref_corr, observ, stocks, iters, measure='pearson',
+        dict_rates['sign'] = count_rate_proc(ref_MST, ref_corr, observ, stocks, iters, measure='sign',
                                              distr='normal')
 
         dict_rates['oneSided_notRand'] = count_rate_test(ref_MST, ref_corr, observ, stocks, iters, one_sided=True,
@@ -114,7 +114,7 @@ def compare_stud(ref_MST, ref_corr, stocks, observ_num=[20], iters=1000, alphas=
             dict_rates = {}
             dict_rates['pearson'] = count_rate_proc(ref_MST, ref_corr, observ, stocks, iters, measure='pearson',
                                                     distr='student', dof=dof)
-            dict_rates['sign'] = count_rate_proc(ref_MST, ref_corr, observ, stocks, iters, measure='pearson',
+            dict_rates['sign'] = count_rate_proc(ref_MST, ref_corr, observ, stocks, iters, measure='sign',
                                                  distr='student', dof=dof)
 
             dict_rates['oneSided_notRand'] = count_rate_test(ref_MST, ref_corr, observ, stocks, iters, one_sided=True,
@@ -144,7 +144,7 @@ def compare_mix(ref_MST, ref_corr, stocks, observ_num=[20], iters=1000, alphas=[
                 dict_rates = {}
                 dict_rates['pearson'] = count_rate_proc(ref_MST, ref_corr, observ, stocks, iters, measure='pearson',
                                                         distr='student', dof=dof)
-                dict_rates['sign'] = count_rate_proc(ref_MST, ref_corr, observ, stocks, iters, measure='pearson',
+                dict_rates['sign'] = count_rate_proc(ref_MST, ref_corr, observ, stocks, iters, measure='sign',
                                                      distr='student', dof=dof)
 
                 dict_rates['oneSided_notRand'] = count_rate_test(ref_MST, ref_corr, observ, stocks, iters,
@@ -169,10 +169,6 @@ def compare_mix(ref_MST, ref_corr, stocks, observ_num=[20], iters=1000, alphas=[
         dict_obs[str(observ) + '_obs'] = dict_norm_rate
 
     return dict_obs
-
-
-
-
 
 
 
